@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Airbnb AI Systems Analysis | MIS 432</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --coral:    #FF5A5F;
+      --coral-dk: #d94c51;
+      --coral-lt: #fff0f0;
+      --gray-900: #1a1a1a;
+      --gray-700: #484848;
+      --gray-500: #767676;
+      --gray-200: #ebebeb;
+      --gray-100: #f7f7f7;
+      --white:    #ffffff;
+      --shadow:   0 2px 16px rgba(0,0,0,0.09);
+      --radius:   12px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                   Helvetica, Arial, sans-serif;
+      color: var(--gray-700);
+      background: var(--gray-100);
+      line-height: 1.65;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    header {
+      background: var(--white);
+      border-bottom: 3px solid var(--coral);
+      padding: 48px 24px 36px;
+      text-align: center;
+    }
+    .logo-line {
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--coral);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    header h1 {
+      font-size: clamp(22px, 4vw, 34px);
+      font-weight: 800;
+      color: var(--gray-900);
+      line-height: 1.25;
+      max-width: 780px;
+      margin: 0 auto 10px;
+    }
+    header .subtitle {
+      font-size: 15px;
+      color: var(--gray-500);
+      margin-bottom: 24px;
+    }
+    .badge-row {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--coral-lt);
+      color: var(--coral-dk);
+      border: 1px solid #ffc9ca;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    /* ── NAV ──────────────────────────────────────────────────*/
+    nav.step-nav {
+      background: var(--white);
+      border-bottom: 1px solid var(--gray-200);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      overflow-x: auto;
+    }
+    nav.step-nav ul {
+      display: flex;
+      list-style: none;
+      padding: 0 20px;
+      gap: 0;
+      min-width: max-content;
+    }
+    nav.step-nav a {
+      display: block;
+      padding: 14px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--gray-500);
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      white-space: nowrap;
+      transition: color .2s, border-color .2s;
+    }
+    nav.step-nav a:hover { color: var(--coral); border-color: var(--coral); }
+
+    /* ── EXECUTIVE SUMMARY ───────────────────────────────────*/
+    .exec-summary {
+      background: var(--white);
+      border-left: 4px solid var(--coral);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 32px 36px;
+      margin: 36px auto;
+      max-width: 1040px;
+    }
+    .exec-summary h2 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--coral);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .exec-summary p {
+      font-size: 16px;
+      color: var(--gray-700);
+      line-height: 1.7;
+    }
+
+    /* ── KEY FINDINGS ────────────────────────────────────────*/
+    .findings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 0 auto 36px;
+      max-width: 1040px;
+    }
+    .finding-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 22px 24px;
+      border-top: 3px solid var(--coral);
+    }
+    .finding-card .finding-icon {
+      font-size: 22px;
+      margin-bottom: 10px;
+    }
+    .finding-card h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 6px;
+    }
+    .finding-card p {
+      font-size: 13px;
+      color: var(--gray-500);
+      line-height: 1.5;
+    }
+
+    /* ── SECTION CARDS ───────────────────────────────────────*/
+    .section-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: var(--coral);
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin: 0 auto 28px;
+      max-width: 1040px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(135deg, var(--coral) 0%, #e8474c 100%);
+      color: var(--white);
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .card-header .step-icon {
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .card-header .step-num {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      opacity: .8;
+    }
+    .card-header h2 {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.2;
+    }
+    .card-header .step-sub {
+      font-size: 13px;
+      opacity: .85;
+      margin-top: 2px;
+    }
+    .card-body {
+      padding: 28px 32px;
+    }
+    .card-body p {
+      margin-bottom: 16px;
+      font-size: 15px;
+      color: var(--gray-700);
+      line-height: 1.7;
+    }
+    .card-body p:last-child { margin-bottom: 0; }
+
+    /* AI Concept callout */
+    .concept-box {
+      background: #fff8f8;
+      border: 1px solid #ffd4d5;
+      border-radius: 8px;
+      padding: 18px 22px;
+      margin: 20px 0;
+    }
+    .concept-box h4 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--coral-dk);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .concept-box p {
+      font-size: 14px;
+      color: var(--gray-700);
+      margin-bottom: 0 !important;
+    }
+
+    /* ── REFLECTIONS SECTION ─────────────────────────────────*/
+    .reflections-section {
+      max-width: 1040px;
+      margin: 48px auto 24px;
+    }
+    .reflections-section > h2 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--gray-900);
+      margin-bottom: 6px;
+    }
+    .reflections-section > p {
+      font-size: 14px;
+      color: var(--gray-500);
+      margin-bottom: 24px;
+    }
+
+    .accordion {
+      border: 1px solid var(--gray-200);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--white);
+      box-shadow: var(--shadow);
+    }
+    .accordion-item {
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .accordion-item:last-child { border-bottom: none; }
+
+    .accordion-trigger {
+      width: 100%;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 24px;
+      text-align: left;
+      transition: background .15s;
+    }
+    .accordion-trigger:hover { background: var(--gray-100); }
+    .accordion-trigger.open { background: var(--coral-lt); }
+
+    .acc-icon {
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+    .acc-meta { flex: 1; }
+    .acc-step {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--coral);
+      font-weight: 700;
+    }
+    .acc-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--gray-900);
+    }
+    .acc-chevron {
+      font-size: 18px;
+      color: var(--gray-500);
+      transition: transform .25s;
+      flex-shrink: 0;
+    }
+    .accordion-trigger.open .acc-chevron { transform: rotate(180deg); }
+
+    .accordion-panel {
+      display: none;
+      padding: 0 24px 24px 60px;
+    }
+    .accordion-panel.open { display: block; }
+    .accordion-panel p {
+      font-size: 15px;
+      color: var(--gray-700);
+      line-height: 1.7;
+      margin-bottom: 14px;
+    }
+    .accordion-panel p:last-child { margin-bottom: 0; }
+    .accordion-panel strong { color: var(--gray-900); }
+
+    /* ── FOOTER ─────────────────────────────────────────────*/
+    footer {
+      background: var(--gray-900);
+      color: var(--gray-500);
+      text-align: center;
+      padding: 36px 24px;
+      margin-top: 60px;
+    }
+    footer .footer-name {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 6px;
+    }
+    footer .footer-course {
+      font-size: 13px;
+      margin-bottom: 14px;
+    }
+    footer .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    footer a {
+      color: var(--coral);
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    footer a:hover { text-decoration: underline; }
+    footer .divider {
+      border-top: 1px solid #333;
+      margin: 20px auto;
+      max-width: 300px;
+    }
+    footer .footer-fine {
+      font-size: 12px;
+      color: #555;
+    }
+
+    /* ── UTILITIES ───────────────────────────────────────────*/
+    .main-padding { padding: 0 20px; }
+    .section-gap { margin-bottom: 40px; }
+    .findings-label {
+      max-width: 1040px;
+      margin: 0 auto 14px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════════════════════════ -->
+<header>
+  <div class="logo-line">&#9632; MIS 432 · AI in Business · Portfolio Case Study</div>
+  <h1>Airbnb AI Systems Analysis:<br>New Host Evaluation — Valencia, Spain</h1>
+  <p class="subtitle">MIS 432 · AI in Business &nbsp;|&nbsp; Western Washington University</p>
+  <div class="badge-row">
+    <span class="badge">Two-Sided Marketplace</span>
+    <span class="badge">Embeddings &amp; Clustering</span>
+    <span class="badge">Smart Pricing</span>
+    <span class="badge">Hybrid AI Models</span>
+    <span class="badge">GenAI Audit</span>
+    <span class="badge">Regulatory Risk</span>
+  </div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STICKY NAV
+══════════════════════════════════════════════════════════════ -->
+<nav class="step-nav" aria-label="Section navigation">
+  <ul>
+    <li><a href="#step1">&#129309; Matching</a></li>
+    <li><a href="#step2">&#128205; Embeddings</a></li>
+    <li><a href="#step3">&#128176; Pricing</a></li>
+    <li><a href="#step4">&#128222; Support</a></li>
+    <li><a href="#step5">&#9997;&#65039; GenAI Audit</a></li>
+    <li><a href="#step6">&#9878;&#65039; Regulatory</a></li>
+    <li><a href="#step7">&#128203; Decision</a></li>
+    <li><a href="#reflections">&#128172; Reflections</a></li>
+  </ul>
+</nav>
+
+<!-- ═══════════════════════════════════════════════════════════
+     EXECUTIVE SUMMARY
+══════════════════════════════════════════════════════════════ -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     KEY FINDINGS
+══════════════════════════════════════════════════════════════ -->
+<div class="findings-label container">
+  <div class="section-label">Key Findings</div>
+</div>
+<div class="findings-grid container">
+  <div class="finding-card">
+    <div class="finding-icon">&#128270;</div>
+    <h3>Behavioral Data Wins</h3>
+    <p>Manual matching scored 3/5. Airbnb's AI, trained on actual clicks and bookings rather than written descriptions, scored 5/5 — the same information gap Elena faces with every potential guest.</p>
+  </div>
+  <div class="finding-card">
+    <div class="finding-icon">&#128205;</div>
+    <h3>Competitors Aren't Who You Think</h3>
+    <p>Airbnb's embedding space placed Elena's 2BR next to studios across town — not the 2BR apartment next door — because digital nomads browse them in the same session.</p>
+  </div>
+  <div class="finding-card">
+    <div class="finding-icon">&#128176;</div>
+    <h3>Festival Surge: +30% Probability</h3>
+    <p>Smart Pricing's festival-weekend premium raised booking probability by roughly 30% and simultaneously increased Airbnb's commission revenue — the platform benefits even more than the host from peak pricing.</p>
+  </div>
+  <div class="finding-card">
+    <div class="finding-icon">&#9878;&#65039;</div>
+    <h3>90-Day Cap Flips the Math</h3>
+    <p>At €100/night × 90 nights, Airbnb earns Elena €9,000/year. A long-term tenant at €900/month earns €10,800. Airbnb only wins if Elena's average nightly rate exceeds €120.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 1 — MATCHING
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step1">
+  <div class="card-header">
+    <div class="step-icon">&#129309;</div>
+    <div>
+      <div class="step-num">Step 1 · Artifact 1 of 7</div>
+      <h2>Matching System Evaluation</h2>
+      <div class="step-sub">How Airbnb's AI connects guests to listings — and what that means for Elena</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      I went into the matching exercise expecting it to be straightforward — five guests, five listings, just read the descriptions and match them up. I scored 3 out of 5. The AI scored 5 out of 5. The gap wasn't because I missed something obvious. It was because the information I had access to was genuinely ambiguous. When Léa and Marco want "something romantic," that could mean the loft with the rooftop terrace or the elegant flat with the cathedral balcony. Both are romantic. I had to guess, and I guessed wrong. The AI didn't guess at all.
+    </p>
+    <p>
+      Airbnb's matching system doesn't read what guests write — it watches what they actually do. Every search term, every listing clicked, every booking made, every listing skipped is a signal. A couple who searched "Valencia anniversary dinner" and then clicked three loft listings with rooftop terrace photos is telling the system something far more specific than "something romantic." The system learns from millions of those behavioral sequences, building what amounts to a model of human taste that no written description can replicate. That's why it hit 5/5 while I was working with the same words the guests typed in.
+    </p>
+    <div class="concept-box">
+      <h4>The AI Principle at Work</h4>
+      <p>
+        Airbnb's matching system learns meaning from behavior, not language. Each click is a token. The model reads sequences of tokens and builds numerical representations — embeddings — that position each listing in a "taste space" where closeness means "attracts the same guests," not "located on the same street." This is why the system consistently outperforms human matchers who only have written descriptions to work with.
+      </p>
+    </div>
+    <p>
+      The business lesson for Elena is uncomfortable: she's not just renting an apartment. She's entering a two-sided marketplace where the platform controls her visibility. Airbnb's matching AI determines which guests ever see her listing — and she has almost no say in that decision. There's a direct parallel to TikTok or Instagram. You can post something genuinely good and get 200 views while a nearly identical post gets 50,000 — because the algorithm decided. The platform's engagement signals, not the quality of the content, determine reach. For Airbnb hosts, the equivalent is that a beautiful listing with great photos can sit at the bottom of search results because the AI doesn't yet have enough behavioral data about it to know who it's for. A brand-new listing like Elena's starts with essentially zero behavioral history, which means the algorithm is guessing about her audience too. She'll be penalized for being new, through no fault of her own.
+    </p>
+    <p>
+      What can a host — or a creator — actually do? The levers are limited but real. Respond to inquiries fast (Airbnb's algorithm rewards response rate). Get early reviews (the first five reviews disproportionately affect ranking). Price competitively at launch to generate the bookings that generate the behavioral data the algorithm needs to learn your audience. These aren't tricks — they're ways to feed the machine the signals it needs to start placing you correctly. But none of them give Elena control over the algorithm itself. That's the fundamental tradeoff of building on someone else's platform.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 2 — EMBEDDINGS
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step2">
+  <div class="card-header">
+    <div class="step-icon">&#128205;</div>
+    <div>
+      <div class="step-num">Step 2 · Artifact 2 of 7</div>
+      <h2>Embedding &amp; Competitive Positioning</h2>
+      <div class="step-sub">Where Elena's listing sits on Airbnb's taste map — and who she's actually competing against</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      I recommended positioning Elena's apartment as a remote-work destination: add a proper standing desk, upgrade the wifi to gigabit, and lead all photos with the workspace before showing the rooftop terrace. The logic is straightforward — the listing already has fast wifi and a dedicated desk, so leaning into that signals attracts the guest segment most likely to generate long, high-value stays.
+    </p>
+    <p>
+      After the positioning choice, Elena's cluster shifted significantly. Before the choice, her 2BR was near other mid-range two-bedroom apartments — geographic neighbors and similar price points. After committing to the remote-work angle, the embedding moved her next to a 1BR loft in a completely different neighborhood and a boutique studio near the old town. What these listings have in common isn't size or location — it's audience. Digital nomads browse all of them in the same sessions. To Airbnb's AI, they're competitors. To a human looking at a map, they wouldn't even be in the same category.
+    </p>
+    <div class="concept-box">
+      <h4>The AI Principle at Work</h4>
+      <p>
+        Embeddings are coordinate systems for meaning. Airbnb's AI assigns each listing a position in a high-dimensional space where distance is measured by audience overlap, not geography. Clustering groups listings that land near each other — identifying competitors that a traditional market analysis would completely miss. Elena's real competition is determined not by who else rents two-bedroom apartments in Ruzafa, but by who else attracts the specific guest type she's signaling to Airbnb's system.
+      </p>
+    </div>
+    <p>
+      The competitor I didn't expect was a €65/night studio in El Carmen — a different neighborhood, smaller, cheaper. But it consistently attracted digital nomads with its Desk &amp; Wifi photos. Under the embedding model, that studio is eating from the same demand pool as Elena's apartment. If a nomad is browsing Valencia options and clicks the studio three times, they're less likely to ever reach Elena's listing. That kind of competition is invisible to traditional analysis and almost impossible to predict without the behavioral data Airbnb is sitting on.
+    </p>
+    <p>
+      The risk of the remote-work positioning is what I'm giving up: the romantic couples market. Couples represent a high-willingness-to-pay segment, especially for a listing with a rooftop terrace, and they tend to book shorter stays with less price sensitivity. By steering the algorithm toward nomads (who tend to want monthly discounts and longer stays), Elena may earn less per night in exchange for more consistent occupancy. In slow seasons — January through March — digital nomads may not be traveling to Valencia in large numbers, which creates a gap that the couples market could have filled. This is a real tradeoff, not just a theoretical one.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 3 — SMART PRICING
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step3">
+  <div class="card-header">
+    <div class="step-icon">&#128176;</div>
+    <div>
+      <div class="step-num">Step 3 · Artifact 3 of 7</div>
+      <h2>Smart Pricing Evaluation</h2>
+      <div class="step-sub">Testing Airbnb's dynamic pricing algorithm across five real scenarios</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      Smart Pricing's five scenarios revealed a system that is broadly rational but serves Airbnb's interests at least as much as Elena's. The algorithm builds a suggested nightly rate from six inputs: a base rate derived from Elena's cluster, a seasonal adjustment, a day-of-week factor, a lead-time modifier, a local events factor, and a supply adjustment based on how many cluster listings are currently available.
+    </p>
+    <p>
+      <strong>Scenario 1 (Normal weekday, July):</strong> Smart Pricing suggested €85. The calculation was clean — summer added €12, Tuesday subtracted €9, and everything else was neutral. I accepted this. It seemed fair and the booking probability was solid at around 55% cluster occupancy.
+    </p>
+    <p>
+      <strong>Scenario 2 (Festival weekend):</strong> Smart Pricing surged to around €145 for a Las Fallas-adjacent weekend. I accepted this too, and it booked. Here's what the lab made visible: Airbnb's commission (roughly 3% host-side, 14% guest-side) scales with the nightly rate. A €145 booking earns Airbnb more than a €85 booking. When Smart Pricing recommends a higher rate and the guest pays it, the platform wins even more than the host. This isn't a flaw — it's alignment when demand is high. But it means the platform's incentive to push prices up is stronger than the host's, because Airbnb doesn't bear the vacancy risk.
+    </p>
+    <p>
+      <strong>Scenario 3 (Last-minute empty Saturday):</strong> Smart Pricing dropped to around €62 despite it being a Saturday. The Saturday premium (+€18) was wiped out by last-minute lead time (-€18) and winter oversupply (-€5). I overrode Smart Pricing here and set €75, which didn't book. Smart Pricing would have booked at €62. This was the scenario where the algorithm's aggregate data was more useful than my intuition.
+    </p>
+    <p>
+      <strong>Scenario 4 (Off-season midweek):</strong> Smart Pricing suggested around €58. I accepted it. The lesson: the algorithm is most reliable when it's working with a lot of cluster data. Slow seasons with many similar listings empty give it the clearest signal about real market rates.
+    </p>
+    <p>
+      <strong>Scenario 5 (High-demand long weekend):</strong> Smart Pricing recommended €130. I accepted, it booked. The overall pattern across all five scenarios is that Smart Pricing is most useful when you're uncertain about demand and most worth overriding when you have specific local knowledge the algorithm doesn't — a private event, a neighborhood festival, or a known gap in supply.
+    </p>
+    <div class="concept-box">
+      <h4>The AI Principle at Work</h4>
+      <p>
+        Smart Pricing is a hybrid model: humans designed the six-input structure, and machine learning calibrated the weights from data across 847 similar cluster listings. The design choice to make every factor visible and adjustable wasn't primarily for accuracy — a black box would likely be more accurate. It was for trust: hosts who can read the breakdown are more likely to keep Smart Pricing on, which gives Airbnb more pricing control across the marketplace.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 4 — SUPPORT
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step4">
+  <div class="card-header">
+    <div class="step-icon">&#128222;</div>
+    <div>
+      <div class="step-num">Step 4 · Artifact 4 of 7</div>
+      <h2>Support Escalation &amp; Hybrid Model Interpretability</h2>
+      <div class="step-sub">Diagnosing an angry host's pricing complaint using Smart Pricing's breakdown</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      Maria, a two-year Superhost, called in furious: Smart Pricing dropped her Saturday night rate from €110 to €62. As the analyst, I pulled her breakdown. The Saturday premium was there — +€18. But three other factors erased it entirely:
+    </p>
+    <p>
+      <strong>Winter season: -€15.</strong> It's January. Demand across her entire cluster is depressed. The algorithm correctly recognizes this even though Maria is thinking about Saturdays, not seasons.
+    </p>
+    <p>
+      <strong>Last-minute lead time: -€18.</strong> The date is tomorrow. At this point the algorithm knows that guests who would pay a premium for Saturday have already booked somewhere else. The remaining pool of last-minute guests is more price-sensitive, so the market-clearing price is lower.
+    </p>
+    <p>
+      <strong>Supply oversupply: -€5.</strong> 38 of 62 listings in her cluster are still available tonight. When supply is high and lead time is short, the algorithm cuts price to move inventory.
+    </p>
+    <p>
+      Net result: €82 base + €18 Saturday - €15 winter - €18 last-minute - €5 oversupply = €62. Maria isn't wrong that Saturdays usually get a premium. She's wrong to think the Saturday factor is the only factor.
+    </p>
+
+    <p><strong>My response to Maria:</strong></p>
+    <p style="background:var(--gray-100); border-left:3px solid var(--coral); padding:14px 18px; border-radius:6px; font-style:italic;">
+      Hi Maria — I completely understand the frustration, especially when you've been a Superhost for two years. Here's what happened. Smart Pricing did apply a +€18 Saturday premium — it always does. The problem is three other factors hit at the same time: it's January (low season, -€15), the date is tomorrow (last-minute, -€18), and 38 of 62 similar listings in Valencia are still available tonight (-€5). Those three together subtracted €38 and left you at €62 despite the Saturday bump. The good news: Smart Pricing is a suggestion. You can override it anytime. My honest advice for tonight — the algorithm is probably right that €62 is the market-clearing price at this lead time. But if you'd rather hold at €80 on principle, that's a reasonable call too. You know your guests better than the model does.
+    </p>
+
+    <div class="concept-box">
+      <h4>The AI Principle at Work</h4>
+      <p>
+        This escalation was resolvable because Smart Pricing is a hybrid model — part human-designed structure, part machine-learned weights. A pure black box would have output €62 with no explanation, and Maria would have had no recourse. Airbnb sacrificed some pricing accuracy (a pure neural net would likely outperform the six-factor model) in exchange for interpretability. That tradeoff keeps hosts using the system and lets support agents actually help.
+      </p>
+    </div>
+
+    <p>
+      <strong>Reusable Support Template — "Why Did Smart Pricing Change My Rate?"</strong>
+    </p>
+    <p>
+      Hi [Host name], thanks for reaching out — pricing changes can be jarring, especially when you don't see an obvious reason. Let me walk you through exactly how Smart Pricing works so we can figure out what happened together. Smart Pricing builds your nightly rate from six factors: (1) a base rate from your listing cluster, (2) a seasonal adjustment, (3) a day-of-week factor, (4) a lead-time modifier based on how far out the date is, (5) a local events bump or drop, and (6) a supply adjustment based on how many similar listings are available. In your case, the base rate was €[X], and [the specific factor — e.g., low season / last-minute / oversupply] adjusted it by €[Y]. Smart Pricing is always a suggestion — you can override it anytime in your calendar. Where it works best: dates more than two weeks out with clear demand signals. Where you might want to set your own price: unique local events the algorithm doesn't know about, or dates where you have specific knowledge about your guest base. Let me know if you'd like to walk through any specific date together.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 5 — GENAI AUDIT
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step5">
+  <div class="card-header">
+    <div class="step-icon">&#9997;&#65039;</div>
+    <div>
+      <div class="step-num">Step 5 · Artifact 5 of 7</div>
+      <h2>GenAI Content Audit</h2>
+      <div class="step-sub">Drafting, evaluating, and rewriting Elena's listing — the "sample, tune, sweep" loop in practice</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      The first draft came back polished and immediately forgettable. It opened with "Discover your perfect Valencia retreat" and described the rooftop terrace as offering "breathtaking panoramic views." Every clause could have been written for any apartment in any Mediterranean city. It mentioned "fast wifi" in passing, buried after two sentences about the "vibrant Ruzafa neighborhood" — which, again, is how every Ruzafa listing describes Ruzafa. There was nothing false in the draft. There was also nothing that would make a digital nomad stop scrolling.
+    </p>
+    <p>
+      My feedback to Claude was specific: stop describing the neighborhood in adjectives and start describing it in facts; lead with the workspace because that's what the target guest actually cares about; cut "breathtaking" entirely; mention that Ruzafa has more restaurants per block than any other neighborhood in Valencia because that's actually true and actually useful. The second draft was meaningfully better — less hotel-brochure, more human.
+    </p>
+
+    <p><strong>Final listing (edited):</strong></p>
+    <div style="background:var(--gray-100); border-radius:8px; padding:20px 22px; margin: 4px 0 16px;">
+      <p style="font-weight:700; font-size:15px; margin-bottom:10px;">
+        "Ruzafa Workspace Apt — Rooftop, Fast WiFi, City Center"
+      </p>
+      <p style="font-size:14px; line-height:1.7; margin-bottom:0;">
+        The desk is real — a proper standing desk with a monitor arm, not a nightstand you're supposed to pretend works. Gigabit fiber, tested. The apartment is a two-bedroom in the middle of Ruzafa, which means you can walk to more restaurants than you can reasonably eat at in a week, and the rooftop terrace faces southwest so the light is good in the evenings. Recently renovated kitchen if you'd rather cook. Ten minutes on foot to the beach. No car needed. Good for one person who needs room to spread out, or two people who won't drive each other crazy. Available year-round.
+      </p>
+    </div>
+
+    <div class="concept-box">
+      <h4>The AI Principle at Work</h4>
+      <p>
+        Generative AI provides capability — it can produce a serviceable first draft in seconds. What it can't provide is specific truth. The detail about the standing desk and monitor arm, the southwest-facing light on the terrace, the honest "one person who needs room to spread out" framing — none of that came from the model. It came from knowing what the apartment is actually like. The model's role in the final version is mostly structural: it suggested the paragraph shape. The content that makes it credible is human. This is the same dynamic Airbnb's engineering team encountered in the test migration from Chapter 6: the LLM did the heavy lifting on 95% of files, but the 5% that required judgment still needed humans.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 6 — REGULATORY RISK
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step6">
+  <div class="card-header">
+    <div class="step-icon">&#9878;&#65039;</div>
+    <div>
+      <div class="step-num">Step 6 · Artifact 6 of 7</div>
+      <h2>Regulatory Risk Assessment</h2>
+      <div class="step-sub">Four-city analysis and financial impact of Valencia's 90-day cap</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      <strong>The four-city picture:</strong> Valencia (28,000 listings, 3.2% of housing stock, rents up 38% since 2019, 90-day annual cap effective 2025) is the moderate case. Barcelona is the extreme: the city is phasing out short-term rentals entirely, with no new licenses being issued and existing licenses expiring. Berlin capped rentals at 90 days per year in 2016, enforced landlord registration, and saw platform listings drop by over 40% in the first year of enforcement. Mexico City is the counter-example — regulations remain light and the market is growing — but Mexico City doesn't share Spain's housing crisis or its political climate.
+    </p>
+    <p>
+      <strong>The trajectory is clear:</strong> every European city in this dataset started with permissive rules, saw housing costs rise as short-term rental supply grew, faced public backlash, and then tightened regulations. Valencia is following Barcelona's path with roughly a two-year lag. The 90-day cap is not the final state — it is a negotiating position. The question is whether the cap tightens to 60 days, then 30, then a full ban on new listings. Based on the Barcelona precedent, I'd estimate a better-than-even chance that Valencia tightens further within three years.
+    </p>
+
+    <p style="background:var(--gray-100); border-left:3px solid var(--coral); padding:14px 18px; border-radius:6px; margin:16px 0;">
+      <strong>Revenue comparison (current 90-day cap):</strong><br>
+      Airbnb @ €100/night × 90 nights = <strong>€9,000/year</strong> (before cleaning, supplies, management time)<br>
+      Long-term tenant @ €900/month × 12 months = <strong>€10,800/year</strong> (stable, no management overhead)<br>
+      Airbnb breaks even only if Elena's average nightly rate exceeds €120.
+    </p>
+
+    <p>
+      <strong>Risk scenario — cap tightens to 60 days:</strong> Revenue drops to €7,200 at €120/night, or €6,000 at €100/night. Both are well below long-term rental income. At that point the Airbnb option becomes economically irrational for most hosts.
+    </p>
+    <p>
+      <strong>Risk scenario — full ban:</strong> Elena holds a permitted property with no short-term rental income path. The apartment reverts to long-term use under Spanish tenant-protection law, which limits how quickly she can adjust rent. She's back to €900/month regardless of what has happened to market rents.
+    </p>
+    <div class="concept-box">
+      <h4>The AI Principle at Work</h4>
+      <p>
+        None of Airbnb's AI systems — matching, Smart Pricing, embeddings — have "regulatory stability" or "impact on local housing supply" in their objective functions. They optimize for bookings and revenue. The externalities (rising rents, displacement of long-term residents, neighborhood character change) are real costs that fall on people who aren't users of the platform at all. When those externalities grow large enough, governments intervene — which is why this regulatory analysis is as important as any AI system evaluation. The AI can be working perfectly and the market can still collapse.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     STEP 7 — RECOMMENDATION
+══════════════════════════════════════════════════════════════ -->
+<div class="card" id="step7">
+  <div class="card-header">
+    <div class="step-icon">&#128203;</div>
+    <div>
+      <div class="step-num">Step 7 · Artifact 7 of 7</div>
+      <h2>Final Recommendation</h2>
+      <div class="step-sub">The decision: what should Elena actually do?</div>
+    </div>
+  </div>
+  <div class="card-body">
+    <p>
+      Elena, here's my honest recommendation: do the hybrid approach, but design it so that long-term rental is the fallback, not the afterthought.
+    </p>
+    <p>
+      What I mean by hybrid: list on Airbnb for the peak summer season only — June, July, August, and the first two weeks of September. That's roughly 90 days, which is exactly Valencia's new cap. Price aggressively, target digital nomads (the rooftop and fast wifi are real advantages in that segment), and run the listing actively — fast responses, professional photos, early reviews to seed the algorithm. Then, when the summer season ends, bring in a long-term tenant on a November-to-May contract. You get the short-term rental upside when demand is highest, and you get steady income and zero management overhead for seven months.
+    </p>
+    <p>
+      The financial case is real but tight. At €120/night × 90 days you'd net around €10,800 from Airbnb — roughly matching the long-term option before expenses. At €140/night in peak weeks (which is achievable during festivals), you clear well above it. But that requires consistent bookings, which requires good reviews, which requires effort. This is not passive income.
+    </p>
+    <p>
+      What I'm asking you to give up with this approach: simplicity. A single long-term tenant at €900/month is clean. No algorithm to manage, no guest complaints at 11pm, no cleaning coordination. The hybrid approach trades all of that for the chance to earn meaningfully more in summer. If you don't want to do the work of hosting, the long-term tenant is the right call and I'd tell you that directly.
+    </p>
+    <p>
+      The risks I want to be honest about: Valencia's 90-day cap is almost certainly not the final regulatory state. Barcelona started with a cap and ended with a ban. If Valencia follows the same trajectory, the hybrid approach becomes untenable in two to three years. That's not a reason to never list on Airbnb — it's a reason to not build your financial plan around Airbnb income being permanent. Keep the long-term tenant relationship warm. Don't do major renovations that only make sense if short-term rental income is guaranteed.
+    </p>
+    <p>
+      One thing this whole analysis made clear: Airbnb's AI systems are sophisticated and, in many ways, genuinely useful for hosts. The matching algorithm will find Elena the right guests faster than she ever could on her own. Smart Pricing, even with its platform-friendly incentives, gives reasonably good guidance for dates she'd otherwise have to guess at. The embedding system will place her listing in front of an audience she'd struggle to find independently. The platform has real value. It just also has real risk — regulatory, algorithmic, and structural. Elena should use it eyes open, not assume it works for her the way it works for Airbnb.
+    </p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     REFLECTIONS (ACCORDION)
+══════════════════════════════════════════════════════════════ -->
+<div class="reflections-section" id="reflections">
+  <div class="section-label">Professor Access</div>
+  <h2>Step Reflections</h2>
+  <p>Click each reflection below to expand my answer to the lab's reflection questions.</p>
+
+  <div class="accordion">
+
+    <!-- R1 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+        <span class="acc-icon">&#129309;</span>
+        <div class="acc-meta">
+          <div class="acc-step">Step 1 · Matching</div>
+          <div class="acc-title">The TikTok &amp; Instagram parallel — what can a host (or creator) actually do?</div>
+        </div>
+        <span class="acc-chevron">&#8964;</span>
+      </button>
+      <div class="accordion-panel">
+        <p>
+          The TikTok problem and the Airbnb host problem are structurally identical. In both cases, a person creates something real — a video, a listing — and then hands it to a platform whose algorithm decides how many people ever see it. Quality matters, but it's not determinative. Two posts that are genuinely equally good can get 200 views and 50,000 views respectively, not because of anything the creator did differently, but because of how the algorithm read early engagement signals. The creator is dependent on a system they didn't build, don't control, and can barely observe.
+        </p>
+        <p>
+          The matching game made this visceral. I scored 3/5 using the same information a new host has access to — written descriptions. The AI scored 5/5 because it had behavioral data: what guests actually clicked, booked, and skipped over millions of sessions. A brand-new listing like Elena's has no behavioral history. The algorithm doesn't know who it's for yet. That means it starts in a guessing state, and during that guessing state, it may surface the listing to the wrong audience — generating low click-through rates, which the algorithm reads as low-quality, which further suppresses the listing. A self-reinforcing downward loop from day one.
+        </p>
+        <p>
+          What can hosts and creators actually do? Not much, but not nothing. The levers that feed the algorithm positive signals early: price competitively at launch (generates bookings faster, generates reviews faster); respond to every inquiry within an hour (response rate is a direct ranking factor); get the listing photographed professionally before going live (click-through rate from search results is the first signal the algorithm reads); and ask your first guests directly to leave a review. None of this gives you control over the algorithm. All of it gives the algorithm something to work with. The goal in the first 60 days is to give the system enough behavioral signal to start placing you correctly, because until it does, you're at the mercy of its initial guess about who you're for.
+        </p>
+        <p>
+          The honest answer to "what can you do" is: you can influence inputs, not outputs. The algorithm decides. You feed it better data to decide with.
+        </p>
+      </div>
+    </div>
+
+    <!-- R2 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+        <span class="acc-icon">&#128205;</span>
+        <div class="acc-meta">
+          <div class="acc-step">Step 2 · Embeddings &amp; Clustering</div>
+          <div class="acc-title">Positioning choice, cluster shift, and the LinkedIn algorithm parallel</div>
+        </div>
+        <span class="acc-chevron">&#8964;</span>
+      </button>
+      <div class="accordion-panel">
+        <p>
+          <strong>Part 1: The positioning choice.</strong> I chose the remote-work setup — desk, wifi, workspace photos as the lead image. After that choice, Elena's listing moved away from the family-friendly cluster (dominated by the Malvarrosa beach villa and its playground mentions) and toward a cluster of studios and boutique apartments frequented by digital nomads and long-stay solo travelers. The competitor that surprised me most was a €65/night studio in El Carmen — smaller, cheaper, different neighborhood entirely. But it appeared in the same browser sessions as Elena's listing repeatedly, because nomads browse both in the same search. Airbnb's AI flagged it as a direct competitor. A traditional real estate analysis would never have identified that studio as relevant to Elena at all.
+        </p>
+        <p>
+          The expected nightly rate in the nomad cluster was slightly lower than the romantic couples cluster — around €95-105 versus €110-120 — but the occupancy rate was more stable across seasons. Nomads book month-long stays with monthly discounts, which compresses per-night revenue but reduces vacancy. The tradeoff is lower peak-night rates in exchange for more predictable calendar fill.
+        </p>
+        <p>
+          <strong>Part 2: The LinkedIn parallel.</strong> If a classmate and I have nearly identical resumes but she's getting 10x more recruiter views, the embedding explanation is that LinkedIn's algorithm has placed us in different clusters based on our behavioral history on the platform — not our credentials. LinkedIn's AI isn't just reading our resumes. It's reading what we've clicked, what content we've engaged with, what our connections' job titles are, whether recruiters who hired similar profiles also viewed our profile. Two identical resumes produce different embeddings if the behavioral context around them is different.
+        </p>
+        <p>
+          What I'd change: first, the headline. LinkedIn's algorithm reads the headline as the primary classification signal — if mine says "Business Student at [University]" and hers says "Product &amp; AI Strategy | MIS432 | Open to Summer Internships," the system places us in different demand clusters immediately. Second, the activity signal matters more than most people realize. Commenting thoughtfully on posts by people in your target industry generates engagement signals that shift your embedding toward that audience. Third, having connections with the job titles of people who hire for roles you want tells the algorithm's collaborative filtering model that you belong in that cluster — the same way a listing that's bookmarked by digital nomads gets placed in the digital nomad cluster even before anyone books it.
+        </p>
+        <p>
+          The fix isn't to pad the resume. It's to generate the behavioral signals that tell the algorithm's embedding model who you're for.
+        </p>
+      </div>
+    </div>
+
+    <!-- R3 — Step 3 has no separate reflection in the lab text, so I note that -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+        <span class="acc-icon">&#128176;</span>
+        <div class="acc-meta">
+          <div class="acc-step">Step 3 · Smart Pricing</div>
+          <div class="acc-title">When to trust the algorithm vs. when to override — and whose interests does it actually serve?</div>
+        </div>
+        <span class="acc-chevron">&#8964;</span>
+      </button>
+      <div class="accordion-panel">
+        <p>
+          The five scenarios taught me that Smart Pricing is not a neutral tool. It is an algorithm designed to maximize bookings across Airbnb's entire marketplace — which usually aligns with Elena's interests, but not always.
+        </p>
+        <p>
+          The clearest misalignment I noticed is in the festival surge scenario. Smart Pricing pushed the nightly rate to roughly €145 during a high-demand weekend. The booking happened, Elena got €145. But Airbnb's take-rate (approximately 17% total across host and guest fees) on €145 is about €24.65. On a €100 baseline rate, it's about €17. The platform earns 45% more revenue from the same booking at the higher price. Airbnb has no vacancy risk — if Elena doesn't book, Airbnb loses nothing. So the platform's incentive is always to push prices toward the top of what the market will bear. That's usually good for Elena too. But it means Smart Pricing is not purely optimizing for Elena's revenue — it's optimizing for platform revenue that happens to correlate with Elena's revenue.
+        </p>
+        <p>
+          The scenario where I overrode Smart Pricing (the last-minute Saturday) and lost is the one I think about most. My instinct was that a Saturday should command a higher price. The algorithm knew something I didn't: at that lead time, the pool of available guests is different. The guests willing to pay a Saturday premium have already booked. The remaining guests are bargain hunters or impulse bookers. Smart Pricing was right. I should have listened.
+        </p>
+        <p>
+          The lesson: trust the algorithm most when you have the least local knowledge (unfamiliar dates, general demand patterns, cluster-level comparisons). Override it most when you have specific knowledge the algorithm can't have — a private event in your building, a neighborhood festival that isn't in the events database, or a regular guest who's willing to pay above-market for a date you already know will book.
+        </p>
+      </div>
+    </div>
+
+    <!-- R4 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+        <span class="acc-icon">&#128222;</span>
+        <div class="acc-meta">
+          <div class="acc-step">Step 4 · Hybrid Model &amp; Interpretability</div>
+          <div class="acc-title">"Why did the price drop?" vs. "Should I lower my price?" — why that distinction matters</div>
+        </div>
+        <span class="acc-chevron">&#8964;</span>
+      </button>
+      <div class="accordion-panel">
+        <p>
+          Maria's follow-up question — "should I lower my price?" — is fundamentally different from "why did it drop?" and the hybrid model can only answer the first one.
+        </p>
+        <p>
+          "Why did the price drop?" is a causal question about the past. Smart Pricing's breakdown answers it perfectly: winter subtracted €15, last-minute subtracted €18, oversupply subtracted €5. You can verify each factor, check the math, explain it to anyone. This is what interpretability buys you.
+        </p>
+        <p>
+          "Should I lower my price?" is a decision question about the future. It requires knowing things the model doesn't have: Does Maria have a regular guest who books her apartment for Saturday brunches and would pay €90 regardless of the market rate? Does she have a principle about not going below a certain floor because she thinks it signals low quality to discerning guests? Is she willing to let the night go empty to preserve her pricing reputation? These are value judgments and local knowledge. No amount of interpretability gets the algorithm there.
+        </p>
+        <p>
+          This is the most important distinction for anyone deploying AI systems in a business context: <strong>AI can explain what happened and predict what will happen. It cannot decide what should happen.</strong> The moment you treat an AI recommendation as a decision — rather than as the best available input to a decision — you've removed the human judgment that the system was designed to support, not replace.
+        </p>
+        <p>
+          For Airbnb specifically, Smart Pricing works well as a floor suggestion: "here's what the data says the market will bear tonight." It works poorly as a ceiling or a strategy: "here's what you should charge if you want to build a long-term reputation with high-value guests." Elena should accept it as information, not instruction.
+        </p>
+      </div>
+    </div>
+
+    <!-- R5 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+        <span class="acc-icon">&#9997;&#65039;</span>
+        <div class="acc-meta">
+          <div class="acc-step">Step 5 · GenAI Audit</div>
+          <div class="acc-title">First draft vs. final version — and why not editing is a professional risk</div>
+        </div>
+        <span class="acc-chevron">&#8964;</span>
+      </button>
+      <div class="accordion-panel">
+        <p>
+          <strong>Part 1: What changed between the first draft and the final version.</strong> The first draft was competent and empty. It opened with "Discover your perfect Valencia retreat" — a sentence that could precede any description of any apartment in any Mediterranean city. It called the rooftop view "breathtaking." It mentioned wifi in passing, halfway through the second paragraph. The description was optimized for sounding good to no one in particular, which is the same as sounding good to no one.
+        </p>
+        <p>
+          I rewrote the opening entirely. Instead of "discover your perfect retreat," I led with the desk: "The desk is real — a proper standing desk with a monitor arm, not a nightstand you're supposed to pretend works." That sentence is doing four things simultaneously: it's specific, it's honest, it's funny in a dry way that signals the host has a personality, and it directly addresses the thing a digital nomad is most worried about (whether the "workspace" is real or a marketing fiction). The AI couldn't have written that sentence because it doesn't know that nomads have been burned by fake workspace claims before. I do.
+        </p>
+        <p>
+          <strong>Part 2: Why not editing is a professional risk.</strong> The surface reason is obvious — the first draft is generic and anyone who reads many listings will recognize it as AI-generated. That's a credibility problem. But the deeper risk is more serious: if you submit AI-generated content without editing it, you don't actually know what it says. You know what you asked for. You don't know whether the model accurately represented the apartment, whether it made any claims that are subtly or overtly false, whether it uses phrasing that violates Airbnb's terms of service, or whether it positions the listing in a way that will attract the wrong guests (who then leave bad reviews because reality didn't match the description). These are all problems that become your problem the moment you publish.
+        </p>
+        <p>
+          In a job context, where your name is on the work, the risk is compounded. Your manager doesn't know Claude wrote the first draft. They think you wrote it. If it's generic, that's how they evaluate your thinking. If it's factually wrong, that's on your record. The value of AI assistance is that it can generate a serviceable structure in 10 seconds, which you then spend 20 minutes making actually good. The risk of AI assistance is that "it's fine" feels like "it's done," and you skip the 20 minutes. That's where the professional damage happens.
+        </p>
+      </div>
+    </div>
+
+    <!-- R6 -->
+    <div class="accordion-item">
+      <button class="accordion-trigger" onclick="toggleAccordion(this)" aria-expanded="false">
+        <span class="acc-icon">&#9878;&#65039;</span>
+        <div class="acc-meta">
+          <div class="acc-step">Step 6 · Regulatory Risk</div>
+          <div class="acc-title">Where will the Airbnb short-term rental market be in 5 years — and what does that mean for Elena today?</div>
+        </div>
+        <span class="acc-chevron">&#8964;</span>
+      </button>
+      <div class="accordion-panel">
+        <p>
+          I think regulations will get meaningfully stricter in European markets over the next five years, and I'd put the probability of Barcelona-style restrictions coming to Valencia within that window at around 60%. My reasoning is based on trajectory, not ideology: every city in the dashboard went from permissive to restrictive following the same sequence — growing platform, rising rents, public backlash, political response. Valencia is at step three of that sequence right now. The 90-day cap is step four. A ban on new licenses or a reduction to 60 days is step five. The sequence has played out the same way in Berlin, Amsterdam, New York, and Barcelona. Valencia is not structurally different from any of those cities.
+        </p>
+        <p>
+          What might slow the tightening: if Spanish housing supply increases significantly through new construction, the pressure on rents that drives political backlash might ease. If Airbnb itself negotiates a data-sharing agreement with Valencia's government (which they've done in some markets), the regulatory relationship might stabilize. If the national government's attention shifts to other issues, local enforcement may become inconsistent. These are real possibilities. But they're scenarios where regulations plateau, not where they loosen.
+        </p>
+        <p>
+          What this means for Elena today: she should not make irreversible financial decisions — major renovations, taking on debt, turning down stable employment — on the assumption that short-term rental income will be available in Valencia for the next five years. The upside is real. The floor is not. The most honest framing is that she's being asked to bet on a market that the local government is actively trying to reduce. That's not a reason to never participate. It is a reason to keep your downside limited.
+        </p>
+        <p>
+          The hybrid approach I recommended in Step 7 is specifically designed for this regulatory environment: it captures the current upside while maintaining the long-term rental fallback. If Valencia's regulations tighten next year, Elena is not caught flat-footed. She already has the long-term tenant relationship and she doesn't need Airbnb income to cover her expenses.
+        </p>
+      </div>
+    </div>
+
+  </div><!-- /accordion -->
+</div><!-- /reflections-section -->
+
+<!-- ═══════════════════════════════════════════════════════════
+     FOOTER
+══════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="footer-name">Niko Papadopoulos</div>
+  <div class="footer-course">MIS 432 · AI in Business &nbsp;|&nbsp; Western Washington University</div>
+  <div class="footer-links">
+    <a href="mailto:papadon@wwu.edu">papadon@wwu.edu</a>
+    <a href="https://www.linkedin.com/in/niko-wwu" target="_blank" rel="noopener">LinkedIn</a>
+  </div>
+  <div class="divider"></div>
+  <div class="footer-fine">
+    Case study completed May 2026 &nbsp;&middot;&nbsp;
+    Airbnb AI Systems Analysis: New Host Evaluation — Valencia, Spain
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCRIPT
+══════════════════════════════════════════════════════════════ -->
+<script>
+  function toggleAccordion(trigger) {
+    const panel = trigger.nextElementSibling;
+    const isOpen = trigger.classList.contains('open');
+
+    // Close all
+    document.querySelectorAll('.accordion-trigger').forEach(t => {
+      t.classList.remove('open');
+      t.setAttribute('aria-expanded', 'false');
+    });
+    document.querySelectorAll('.accordion-panel').forEach(p => {
+      p.classList.remove('open');
+    });
+
+    // Open this one if it was closed
+    if (!isOpen) {
+      trigger.classList.add('open');
+      trigger.setAttribute('aria-expanded', 'true');
+      panel.classList.add('open');
+    }
+  }
+</script>
+
+</body>
+</html>
